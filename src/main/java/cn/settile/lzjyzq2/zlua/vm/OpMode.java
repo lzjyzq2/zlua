@@ -6,7 +6,7 @@ public enum OpMode {
 
     IABx,
 
-    IAsx,
+    IAsBx,
 
     IAx
 }

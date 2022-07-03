@@ -4,6 +4,9 @@ import cn.settile.lzjyzq2.zlua.chunk.BinaryChunk;
 import cn.settile.lzjyzq2.zlua.chunk.LocVar;
 import cn.settile.lzjyzq2.zlua.chunk.Prototype;
 import cn.settile.lzjyzq2.zlua.chunk.Upvalue;
+import cn.settile.lzjyzq2.zlua.vm.Instruction;
+import cn.settile.lzjyzq2.zlua.vm.OpArg;
+import cn.settile.lzjyzq2.zlua.vm.OpCode;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -70,7 +73,48 @@ public class Program {
             if (prototype.getLineInfo().length > 0) {
                 line = String.format("%d", prototype.getLineInfo()[i]);
             }
-            System.out.printf("\t%d\t[%s]\t0x%08X\n", i + 1, line, prototype.getCode()[i]);
+            int instruction = prototype.getCode()[i];
+            OpCode opCode = Instruction.getOpcode(instruction);
+            System.out.printf("\t%d\t[%s]\t%-10s \t", i + 1, line, opCode.name());
+            printOperands(instruction);
+            System.out.println();
+        }
+    }
+
+    private static void printOperands(int i) {
+        OpCode opCode = Instruction.getOpcode(i);
+        switch (opCode.getOpMode()) {
+            case IABC: {
+                Instruction.ABC abc = Instruction.ABC(i);
+                System.out.printf("%d", abc.getA());
+                if (opCode.getArgBMode() != OpArg.OpArgN) {
+                    System.out.printf(" %d", abc.getB() > 0xFF ? -1 - (abc.getB() & 0xFF) : abc.getB());
+                }
+                if (opCode.getArgCMode() != OpArg.OpArgN) {
+                    System.out.printf(" %d", abc.getC() > 0xFF ? -1 - (abc.getC() & 0xFF) : abc.getC());
+                }
+                break;
+            }
+            case IABx: {
+                Instruction.ABx aBx = Instruction.ABx(i);
+                System.out.printf("%d", aBx.getA());
+                if (opCode.getArgBMode() == OpArg.OpArgK) {
+                    System.out.printf(" %d", -1 - aBx.getBx());
+                } else if (opCode.getArgBMode() == OpArg.OpArgU) {
+                    System.out.printf(" %d", aBx.getBx());
+                }
+                break;
+            }
+            case IAsBx: {
+                Instruction.AsBx asBx = Instruction.AsBx(i);
+                System.out.printf("%d %d", asBx.getA(), asBx.getSBx());
+                break;
+            }
+            case IAx: {
+                System.out.printf("%d", -1 - Instruction.Ax(i));
+                break;
+            }
+
         }
     }
 

@@ -7,7 +7,7 @@ import static cn.settile.lzjyzq2.zlua.api.LuaType.*;
 
 public class LuaValue {
 
-    static LuaType typeOf(Object val) {
+    public static LuaType typeOf(Object val) {
         if (val == null) {
             return LUA_TNIL;
         } else if (val instanceof Boolean) {
@@ -21,7 +21,7 @@ public class LuaValue {
         }
     }
 
-    static boolean toBoolean(Object val) {
+    public static boolean convertToBoolean(Object val) {
         if (val == null) {
             return false;
         } else if (val instanceof Boolean) {

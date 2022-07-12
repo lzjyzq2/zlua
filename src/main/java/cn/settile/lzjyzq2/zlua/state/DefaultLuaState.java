@@ -1,8 +1,7 @@
 package cn.settile.lzjyzq2.zlua.state;
 
-import cn.settile.lzjyzq2.zlua.api.LuaState;
-import cn.settile.lzjyzq2.zlua.api.LuaType;
-import cn.settile.lzjyzq2.zlua.exception.LuaStackUnderflowException;
+import cn.settile.lzjyzq2.zlua.api.*;
+import cn.settile.lzjyzq2.zlua.exception.*;
 
 public class DefaultLuaState implements LuaState {
 
@@ -193,7 +192,7 @@ public class DefaultLuaState implements LuaState {
     @Override
     public Long toIntegerX(int idx) {
         Object value = stack.get(idx);
-        return value instanceof Long ? (Long) value : null;
+        return LuaValue.convertToInteger(value);
     }
 
     @Override
@@ -204,13 +203,7 @@ public class DefaultLuaState implements LuaState {
     @Override
     public Double toNumberX(int idx) {
         Object value = stack.get(idx);
-        if (value instanceof Double) {
-            return (Double) value;
-        } else if (value instanceof Long) {
-            return ((Long) value).doubleValue();
-        } else {
-            return null;
-        }
+        return LuaValue.convertToFloat(value);
     }
 
     @Override
@@ -248,5 +241,63 @@ public class DefaultLuaState implements LuaState {
     @Override
     public void pushString(String s) {
         stack.push(s);
+    }
+
+    @Override
+    public void arith(ArithOp op) {
+        Object b = stack.pop();
+        Object a = op != ArithOp.LUA_OPUNM && op != ArithOp.LUA_OPBNOT ? stack.pop() : b;
+        Operator operator = ApiArith.getOperator(op);
+        Object result = ApiArith.arith(a, b, operator);
+        if (result != null) {
+            stack.push(result);
+        } else {
+            throw new LuaArithmeticException();
+        }
+    }
+
+    @Override
+    public boolean compare(int idx1, int idx2, CompareOp op) {
+        Object value1 = stack.get(idx1);
+        Object value2 = stack.get(idx2);
+        switch (op) {
+            case LUA_OPEQ:
+                return ApiCompare.eq(value1, value2);
+            case LUA_OPLT:
+                return ApiCompare.lt(value1, value2);
+            case LUA_OPLE:
+                return ApiCompare.le(value1, value2);
+            default:
+                throw new LuaInvalidCompareOpException();
+        }
+    }
+
+    @Override
+    public void len(int idx) {
+        Object value = stack.get(idx);
+        if (value instanceof String) {
+            pushInteger(((String) value).length());
+        } else {
+            throw new LuaLengthException();
+        }
+    }
+
+    @Override
+    public void concat(int n) {
+        if (n == 0) {
+            stack.push("");
+        } else if (n >= 2) {
+            for (int i = 1; i < n; i++) {
+                if (isString(-1) && isString(-2)) {
+                    String s2 = toString(-1);
+                    String s1 = toString(-2);
+                    pop(2);
+                    stack.push(s1 + s2);
+                    continue;
+                }
+                throw new LuaConcatException();
+            }
+        }
+        // n == 1, do nothing
     }
 }

@@ -1,9 +1,13 @@
 package cn.settile.lzjyzq2.zlua;
 
+import cn.settile.lzjyzq2.zlua.api.LuaState;
+import cn.settile.lzjyzq2.zlua.api.LuaType;
+import cn.settile.lzjyzq2.zlua.api.LuaVM;
 import cn.settile.lzjyzq2.zlua.chunk.BinaryChunk;
 import cn.settile.lzjyzq2.zlua.chunk.LocVar;
 import cn.settile.lzjyzq2.zlua.chunk.Prototype;
 import cn.settile.lzjyzq2.zlua.chunk.Upvalue;
+import cn.settile.lzjyzq2.zlua.state.DefaultLuaState;
 import cn.settile.lzjyzq2.zlua.vm.Instruction;
 import cn.settile.lzjyzq2.zlua.vm.OpArg;
 import cn.settile.lzjyzq2.zlua.vm.OpCode;
@@ -16,8 +20,21 @@ public class Program {
 
     public static void main(String[] args) throws IOException {
         if (args.length > 0) {
-            toUnDumpChunk(args[0]);
+            switch (args[0]) {
+                case "-c":
+                    toUnDumpChunk(args[1]);
+                    break;
+                case "-r":
+                    runLuaMain(args[1]);
+                    break;
+            }
         }
+    }
+
+    public static void runLuaMain(String path) throws IOException {
+        byte[] data = Files.readAllBytes(Paths.get(path));
+        Prototype proto = BinaryChunk.unDump(data);
+        luaMain(proto);
     }
 
     public static void toUnDumpChunk(String path) throws IOException {
@@ -154,4 +171,46 @@ public class Program {
     }
 
 
+    public static void luaMain(Prototype prototype) {
+        int nRegs = prototype.getMaxStackSize();
+        LuaVM vm = new DefaultLuaState(nRegs + 8, prototype);
+        vm.setTop(nRegs);
+        for (; ; ) {
+            int pc = vm.getPC();
+            int i = vm.fetch();
+            OpCode opCode = Instruction.getOpcode(i);
+            if (opCode != OpCode.RETURN) {
+                opCode.getOpAction().execute(i, vm);
+                System.out.printf("[%02d] %-8s ", pc + 1, opCode.name());
+                printStack(vm);
+            } else {
+                break;
+            }
+        }
+    }
+
+    static void printStack(LuaState luaState) {
+        int top = luaState.getTop();
+        for (int i = 1; i <= top; i++) {
+            LuaType type = luaState.type(i);
+            switch (type) {
+                case LUA_TBOOLEAN:
+                    System.out.printf("[%b]", luaState.toBoolean(i));
+                    break;
+                case LUA_TNUMBER:
+                    if (luaState.isInteger(i)) {
+                        System.out.printf("[%d]", luaState.toInteger(i));
+                    } else {
+                        System.out.printf("[%f]", luaState.toNumber(i));
+                    }
+                    break;
+                case LUA_TSTRING:
+                    System.out.printf("[\"%s\"]", luaState.toString(i));
+                    break;
+                default:
+                    System.out.printf("[%s]", luaState.typeName(type));
+            }
+        }
+        System.out.println();
+    }
 }

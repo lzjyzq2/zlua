@@ -1,18 +1,25 @@
 package cn.settile.lzjyzq2.zlua.state;
 
 import cn.settile.lzjyzq2.zlua.api.*;
+import cn.settile.lzjyzq2.zlua.chunk.Prototype;
 import cn.settile.lzjyzq2.zlua.exception.*;
 
-public class DefaultLuaState implements LuaState {
+public class DefaultLuaState implements LuaState, LuaVM {
 
     private final LuaStack stack;
 
-    public DefaultLuaState() {
-        this(20);
+    private int pc;
+
+    private final Prototype prototype;
+
+    public DefaultLuaState(Prototype prototype) {
+        this(20, prototype);
     }
 
-    public DefaultLuaState(int size) {
-        stack = new LuaStack(size);
+    public DefaultLuaState(int size, Prototype prototype) {
+        this.stack = new LuaStack(size);
+        this.prototype = prototype;
+        this.pc = 0;
     }
 
     @Override
@@ -299,5 +306,37 @@ public class DefaultLuaState implements LuaState {
             }
         }
         // n == 1, do nothing
+    }
+
+    @Override
+    public int getPC() {
+        return pc;
+    }
+
+    @Override
+    public void addPC(int n) {
+        pc += n;
+    }
+
+    @Override
+    public int fetch() {
+        int i = prototype.getCode()[pc];
+        pc++;
+        return i;
+    }
+
+    @Override
+    public void getConst(int idx) {
+        Object c = prototype.getConstants()[idx];
+        stack.push(c);
+    }
+
+    @Override
+    public void getRK(int rk) {
+        if (rk > 0xFF) {
+            getConst(rk & 0xFF);
+        } else {
+            pushValue(rk + 1);
+        }
     }
 }

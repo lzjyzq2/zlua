@@ -12,8 +12,17 @@ import static org.junit.jupiter.api.Assertions.*;
 class ProgramTest {
 
     @Test
-    void main() throws URISyntaxException, IOException {
-        Program.main(new String[]{Paths.get(
-                Objects.requireNonNull(getClass().getResource("/hello_world.luac")).toURI()).toFile().getAbsolutePath()});
+    void main_c() throws URISyntaxException, IOException {
+        Program.main(new String[]{
+                "-c",
+                Paths.get(Objects.requireNonNull(getClass().getResource("/hello_world.luac")).toURI()).toFile().getAbsolutePath()
+        });
+    }
+
+    @Test
+    void main_r() throws URISyntaxException, IOException {
+        Program.main(new String[]{
+                "-r", Paths.get(Objects.requireNonNull(getClass().getResource("/luac.out")).toURI()).toFile().getAbsolutePath()
+        });
     }
 }

@@ -284,6 +284,8 @@ public class DefaultLuaState implements LuaState, LuaVM {
         Object value = stack.get(idx);
         if (value instanceof String) {
             pushInteger(((String) value).length());
+        } else if (value instanceof LuaTable) {
+            pushInteger(((LuaTable) value).len());
         } else {
             throw new LuaLengthException();
         }

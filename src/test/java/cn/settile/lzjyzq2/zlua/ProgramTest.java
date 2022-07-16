@@ -22,7 +22,14 @@ class ProgramTest {
     @Test
     void main_r() throws URISyntaxException, IOException {
         Program.main(new String[]{
-                "-r", Paths.get(Objects.requireNonNull(getClass().getResource("/luac.out")).toURI()).toFile().getAbsolutePath()
+                "-r", Paths.get(Objects.requireNonNull(getClass().getResource("/sum.out")).toURI()).toFile().getAbsolutePath()
+        });
+    }
+
+    @Test
+    void main_r_t() throws URISyntaxException, IOException {
+        Program.main(new String[]{
+                "-r", Paths.get(Objects.requireNonNull(getClass().getResource("/test.out")).toURI()).toFile().getAbsolutePath()
         });
     }
 }

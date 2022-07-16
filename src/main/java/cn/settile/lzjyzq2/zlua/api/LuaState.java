@@ -1,5 +1,7 @@
 package cn.settile.lzjyzq2.zlua.api;
 
+import cn.settile.lzjyzq2.zlua.state.LuaTable;
+
 public interface LuaState {
     /* basic stack manipulation */
     int getTop();
@@ -79,4 +81,20 @@ public interface LuaState {
     void len(int idx);
 
     void concat(int n);
+
+    void newTable();
+
+    void createTable(int nArr, int nRec);
+
+    LuaType getTable(int idx);
+
+    LuaType getField(int idx, String k);
+
+    LuaType getI(int idx, int i);
+
+    void setTable(int idx);
+
+    void setField(int idx, String k);
+
+    void setI(int idx, long n);
 }

@@ -311,6 +311,74 @@ public class DefaultLuaState implements LuaState, LuaVM {
     }
 
     @Override
+    public void newTable() {
+        createTable(0, 0);
+    }
+
+    @Override
+    public void createTable(int nArr, int nRec) {
+        stack.push(new LuaTable(nArr, nRec));
+    }
+
+    @Override
+    public LuaType getTable(int idx) {
+        Object t = stack.get(idx);
+        Object k = stack.pop();
+        return getTable(t, k);
+    }
+
+    private LuaType getTable(Object t, Object k) {
+        if (t instanceof LuaTable) {
+            Object val = ((LuaTable) t).get(k);
+            stack.push(val);
+            return LuaValue.typeOf(val);
+        }
+        throw new LuaTypeCastException(LuaValue.typeOf(t) + " not a table!");
+    }
+
+    @Override
+    public LuaType getField(int idx, String k) {
+        Object t = stack.get(idx);
+        return getTable(t, k);
+    }
+
+    @Override
+    public LuaType getI(int idx, int i) {
+        Object t = stack.get(idx);
+        return getTable(t, i);
+    }
+
+    @Override
+    public void setTable(int idx) {
+        Object t = stack.get(idx);
+        Object v = stack.pop();
+        Object k = stack.pop();
+        setTable(t, k, v);
+    }
+
+    private void setTable(Object t, Object k, Object v) {
+        if (t instanceof LuaTable) {
+            ((LuaTable) t).put(k, v);
+            return;
+        }
+        throw new LuaTypeCastException(LuaValue.typeOf(t) + " not a table!");
+    }
+
+    @Override
+    public void setField(int idx, String k) {
+        Object t = stack.get(idx);
+        Object v = stack.pop();
+        setTable(t, k, v);
+    }
+
+    @Override
+    public void setI(int idx, long n) {
+        Object t = stack.get(idx);
+        Object v = stack.pop();
+        setTable(t, n, v);
+    }
+
+    @Override
     public int getPC() {
         return pc;
     }

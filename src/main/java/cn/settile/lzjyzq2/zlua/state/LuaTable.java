@@ -5,7 +5,6 @@ import cn.settile.lzjyzq2.zlua.exception.LuaTableNullKeyException;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 
 public class LuaTable {
 
@@ -62,6 +61,7 @@ public class LuaTable {
                     if (value != null) {
                         appendAndExpandArray(value);
                     }
+                    return;
                 }
             }
         }
@@ -80,27 +80,33 @@ public class LuaTable {
     private void shrinkArray() {
         for (int i = arr.length - 1; i >= 0; i--) {
             if (arr[i] == null) {
-                arr[i] = null;
+                arr = Arrays.copyOf(arr, i + 1);
             }
         }
     }
 
     private void appendAndExpandArray(Object value) {
-        Map<Integer, Object> tmpMap = new HashMap<>();
-        for (int idx = arr.length + 1; ; idx++) {
-            Object val = map.remove((long) idx);
-            if (val != null) {
-                tmpMap.put(idx, val);
-            } else {
-                break;
+        int size = 0;
+        Object[] tmpArr = null;
+        if (map != null) {
+            tmpArr = new Object[map.size()];
+            for (int idx = arr.length + 1; ; idx++) {
+                Object val = map.remove((long) idx);
+                if (val != null) {
+                    tmpArr[size] = val;
+                    size++;
+                } else {
+                    break;
+                }
             }
         }
-        int start = arr.length + 1;
-        arr = Arrays.copyOf(arr, arr.length + 1 + tmpMap.size());
+        int start = arr.length;
+        arr = Arrays.copyOf(arr, arr.length + 1 + size);
         arr[start] = value;
-        for (int i = start; i < tmpMap.size(); i++) {
-            arr[start + 1] = tmpMap.get(i);
+        if (size > 0) {
+            System.arraycopy(tmpArr, 0, arr, start + 1, size);
         }
+
     }
 
     public int len() {

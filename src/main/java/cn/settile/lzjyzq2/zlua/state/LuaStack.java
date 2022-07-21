@@ -10,6 +10,14 @@ public class LuaStack {
 
     private int top = 0;
 
+    private LuaStack prev;
+
+    private Object[] varargs;
+
+    private Closure closure;
+
+    private int pc = 0;
+
 
     public LuaStack(int size) {
         this.slots = new Object[size];
@@ -87,6 +95,10 @@ public class LuaStack {
         return top;
     }
 
+    public void top(int top) {
+        this.top = top;
+    }
+
     public void reverse(int from, int to) {
         from = absIndex(from);
         to = absIndex(to);
@@ -99,5 +111,60 @@ public class LuaStack {
             min++;
             max--;
         }
+    }
+
+
+    public Object[] popN(int n) {
+        Object[] values = new Object[n];
+        for (int i = n - 1; i >= 0; i--) {
+            values[i] = pop();
+        }
+        return values;
+    }
+
+    public void pushN(Object[] values, int n) {
+        int valuesLength = values.length;
+        if (n < 0) {
+            n = valuesLength;
+        }
+        for (int i = 0; i < n; i++) {
+            if (i < valuesLength) {
+                push(values[i]);
+            } else {
+                push(null);
+            }
+        }
+    }
+
+    public LuaStack getPrev() {
+        return prev;
+    }
+
+    public void setPrev(LuaStack prev) {
+        this.prev = prev;
+    }
+
+    public int getPc() {
+        return pc;
+    }
+
+    public int addPc(int n) {
+        return pc += n;
+    }
+
+    public Closure getClosure() {
+        return closure;
+    }
+
+    public void setClosure(Closure closure) {
+        this.closure = closure;
+    }
+
+    public Object[] getVarargs() {
+        return varargs;
+    }
+
+    public void setVarargs(Object[] varargs) {
+        this.varargs = varargs;
     }
 }

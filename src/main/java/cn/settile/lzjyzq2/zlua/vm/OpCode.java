@@ -19,7 +19,7 @@ public enum OpCode {
     SETUPVAL(0, 0, OpArgU, OpArgN, IABC, null), // UpValue[B] := R(A)
     SETTABLE(0, 0, OpArgK, OpArgK, IABC, InstTable::setTable), // R(A)[RK(B)] := RK(C)
     NEWTABLE(0, 1, OpArgU, OpArgU, IABC, InstTable::newTable), // R(A) := {} (size = B,C)
-    SELF(0, 1, OpArgR, OpArgK, IABC, null), // R(A+1) := R(B); R(A) := R(B)[RK(C)]
+    SELF(0, 1, OpArgR, OpArgK, IABC, InstCall::self), // R(A+1) := R(B); R(A) := R(B)[RK(C)]
     ADD(0, 1, OpArgK, OpArgK, IABC, InstOperators::add), // R(A) := RK(B) + RK(C)
     SUB(0, 1, OpArgK, OpArgK, IABC, InstOperators::sub), // R(A) := RK(B) - RK(C)
     MUL(0, 1, OpArgK, OpArgK, IABC, InstOperators::mul), // R(A) := RK(B) * RK(C)
@@ -43,16 +43,16 @@ public enum OpCode {
     LE(1, 0, OpArgK, OpArgK, IABC, InstOperators::le), // if ((RK(B) <= RK(C)) ~= A) then pc++
     TEST(1, 0, OpArgN, OpArgU, IABC, InstOperators::test), // if not (R(A) <=> C) then pc++
     TESTSET(1, 1, OpArgR, OpArgU, IABC, InstOperators::testSet), // if (R(B) <=> C) then R(A) := R(B) else pc++
-    CALL(0, 1, OpArgU, OpArgU, IABC, null), // R(A), ... ,R(A+C-2) := R(A)(R(A+1), ... ,R(A+B-1))
-    TAILCALL(0, 1, OpArgU, OpArgU, IABC, null), // return R(A)(R(A+1), ... ,R(A+B-1))
-    RETURN(0, 0, OpArgU, OpArgN, IABC, null), // return R(A), ... ,R(A+B-2)
+    CALL(0, 1, OpArgU, OpArgU, IABC, InstCall::call), // R(A), ... ,R(A+C-2) := R(A)(R(A+1), ... ,R(A+B-1))
+    TAILCALL(0, 1, OpArgU, OpArgU, IABC, InstCall::tailCall), // return R(A)(R(A+1), ... ,R(A+B-1))
+    RETURN(0, 0, OpArgU, OpArgN, IABC, InstCall::_return), // return R(A), ... ,R(A+B-2)
     FORLOOP(0, 1, OpArgR, OpArgN, IAsBx, InstOperators::forLoop), // R(A)+=R(A+2); if R(A) <?= R(A+1) then { pc+=sBx; R(A+3)=R(A) }
     FORPREP(0, 1, OpArgR, OpArgN, IAsBx, InstOperators::forPrep), // R(A)-=R(A+2); pc+=sBx
     TFORCALL(0, 0, OpArgN, OpArgU, IABC, null), // R(A+3), ... ,R(A+2+C) := R(A)(R(A+1), R(A+2));
     TFORLOOP(0, 1, OpArgR, OpArgN, IAsBx, null), // if R(A+1) ~= nil then { R(A)=R(A+1); pc += sBx }
     SETLIST(0, 0, OpArgU, OpArgU, IABC, InstTable::setList), // R(A)[(C-1)*FPF+i] := R(A+i), 1 <= i <= B
-    CLOSURE(0, 1, OpArgU, OpArgN, IABx, null), // R(A) := closure(KPROTO[Bx])
-    VARARG(0, 1, OpArgU, OpArgN, IABC, null), // R(A), R(A+1), ..., R(A+B-2) = vararg
+    CLOSURE(0, 1, OpArgU, OpArgN, IABx, InstCall::closure), // R(A) := closure(KPROTO[Bx])
+    VARARG(0, 1, OpArgU, OpArgN, IABC, InstCall::vararg), // R(A), R(A+1), ..., R(A+B-2) = vararg
     EXTRAARG(0, 0, OpArgU, OpArgU, IAx, null) // extra (larger) argument for previous opcode
     ;
     private final int testFlag; // operator is a test (next instruction must be a jump)

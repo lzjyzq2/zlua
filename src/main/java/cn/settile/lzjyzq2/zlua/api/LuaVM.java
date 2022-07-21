@@ -31,4 +31,9 @@ public interface LuaVM extends LuaState{
      */
     void getRK(int rk);
 
+    void loadProto(int idx);
+
+    void loadVararg(int i);
+
+    int registerCount();
 }

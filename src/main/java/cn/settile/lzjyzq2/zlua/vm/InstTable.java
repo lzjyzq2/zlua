@@ -45,6 +45,13 @@ public class InstTable {
         int b = Instruction.getB(i);
         int c = Instruction.getC(i);
         a += 1;
+
+        boolean bIsZero = b == 0;
+        if (bIsZero) {
+            b = (int) vm.toInteger(-1) - a - 1;
+            vm.pop(1);
+        }
+
         if (c > 0) {
             c = c - 1;
         } else {
@@ -55,6 +62,15 @@ public class InstTable {
             idx++;
             vm.pushValue(a + j);
             vm.setI(a, idx);
+        }
+
+        if (bIsZero) {
+            for (int j = vm.registerCount() + 1; j <= vm.getTop(); j++) {
+                idx++;
+                vm.pushValue(j);
+                vm.setI(a, idx);
+            }
+            vm.setTop(vm.registerCount());
         }
     }
 }

@@ -10,7 +10,7 @@ public class DefaultLuaStateTest {
 
     @Test
     void test() {
-        LuaState luaState = new DefaultLuaState(null);
+        LuaState luaState = new DefaultLuaState();
         luaState.pushBoolean(true);
         printStack(luaState);
         luaState.pushInteger(10);
@@ -58,7 +58,7 @@ public class DefaultLuaStateTest {
 
     @Test
     void test1(){
-        LuaState luaState = new DefaultLuaState(20,null);
+        LuaState luaState = new DefaultLuaState(20);
         luaState.pushInteger(1);
         luaState.pushString("2.0");
         luaState.pushString("3.0");

@@ -97,4 +97,8 @@ public interface LuaState {
     void setField(int idx, String k);
 
     void setI(int idx, long n);
+
+    int load(byte[] chunk, String chunkName, String mode);
+
+    void call(int nArgs, int nResults);
 }

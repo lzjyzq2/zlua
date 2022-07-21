@@ -1,25 +1,22 @@
 package cn.settile.lzjyzq2.zlua.state;
 
 import cn.settile.lzjyzq2.zlua.api.*;
+import cn.settile.lzjyzq2.zlua.chunk.BinaryChunk;
 import cn.settile.lzjyzq2.zlua.chunk.Prototype;
 import cn.settile.lzjyzq2.zlua.exception.*;
+import cn.settile.lzjyzq2.zlua.vm.Instruction;
+import cn.settile.lzjyzq2.zlua.vm.OpCode;
 
 public class DefaultLuaState implements LuaState, LuaVM {
 
-    private final LuaStack stack;
+    private LuaStack stack;
 
-    private int pc;
-
-    private final Prototype prototype;
-
-    public DefaultLuaState(Prototype prototype) {
-        this(20, prototype);
+    public DefaultLuaState() {
+        this(20);
     }
 
-    public DefaultLuaState(int size, Prototype prototype) {
+    public DefaultLuaState(int size) {
         this.stack = new LuaStack(size);
-        this.prototype = prototype;
-        this.pc = 0;
     }
 
     @Override
@@ -379,25 +376,87 @@ public class DefaultLuaState implements LuaState, LuaVM {
     }
 
     @Override
+    public int load(byte[] chunk, String chunkName, String mode) {
+        Prototype proto = BinaryChunk.unDump(chunk);
+        Closure closure = new Closure(proto);
+        stack.push(closure);
+        return 0;
+    }
+
+    @Override
+    public void call(int nArgs, int nResults) {
+        Object value = stack.get(-(nArgs + 1));
+        if (value instanceof Closure) {
+            Closure c = (Closure) value;
+            System.out.printf("call %s<%d,%d>\n", c.getProto().getSource(), c.getProto().getLineDefined(), c.getProto().getLastLineDefined());
+            callLuaClosure(nArgs, nResults, c);
+        } else {
+            throw new LuaNotFunctionException();
+        }
+    }
+
+    private void callLuaClosure(int nArgs, int nResults, Closure c) {
+        int nRegs = c.getProto().getMaxStackSize();
+        int nParams = c.getProto().getNumParams();
+        boolean isVararg = c.getProto().getIsVararg() == 1;
+
+        LuaStack newStack = new LuaStack(nRegs + 20);
+        newStack.setClosure(c);
+
+        Object[] funcAndArgs = stack.popN(nArgs + 1);
+        Object[] args = new Object[funcAndArgs.length - 1];
+        System.arraycopy(funcAndArgs, 1, args, 0, funcAndArgs.length - 1);
+        newStack.pushN(args, nParams);
+        newStack.top(nRegs);
+        if (nArgs > nParams && isVararg) {
+            int varargsLength = funcAndArgs.length - 1 - nParams;
+            Object[] varargs = new Object[varargsLength];
+            System.arraycopy(funcAndArgs, 1 + nParams, varargs, 0, varargsLength);
+            newStack.setVarargs(varargs);
+        }
+
+        pushLuaStack(newStack);
+        runLuaClosure();
+        popLuaStack();
+
+        if (nResults != 0) {
+            Object[] results = newStack.popN(newStack.top() - nRegs);
+            stack.check(results.length);
+            stack.pushN(results, nResults);
+        }
+    }
+
+    private void runLuaClosure() {
+        while (true) {
+            int inst = fetch();
+            OpCode opCode = Instruction.getOpcode(inst);
+            opCode.getOpAction().execute(inst, this);
+            if (opCode == OpCode.RETURN) {
+                break;
+            }
+        }
+    }
+
+    @Override
     public int getPC() {
-        return pc;
+        return stack.getPc();
     }
 
     @Override
     public void addPC(int n) {
-        pc += n;
+        stack.addPc(n);
     }
 
     @Override
     public int fetch() {
-        int i = prototype.getCode()[pc];
-        pc++;
+        int i = stack.getClosure().getProto().getCode()[stack.getPc()];
+        addPC(1);
         return i;
     }
 
     @Override
     public void getConst(int idx) {
-        Object c = prototype.getConstants()[idx];
+        Object c = stack.getClosure().getProto().getConstants()[idx];
         stack.push(c);
     }
 
@@ -408,5 +467,37 @@ public class DefaultLuaState implements LuaState, LuaVM {
         } else {
             pushValue(rk + 1);
         }
+    }
+
+    @Override
+    public void loadProto(int idx) {
+        Prototype proto = stack.getClosure().getProto().getProtos()[idx];
+        Closure closure = new Closure(proto);
+        stack.push(closure);
+    }
+
+    @Override
+    public void loadVararg(int i) {
+        if (i < 0) {
+            i = stack.getVarargs().length;
+        }
+        stack.check(i);
+        stack.pushN(stack.getVarargs(), i);
+    }
+
+    @Override
+    public int registerCount() {
+        return stack.getClosure().getProto().getMaxStackSize();
+    }
+
+    public void pushLuaStack(LuaStack stack) {
+        stack.setPrev(this.stack);
+        this.stack = stack;
+    }
+
+    public void popLuaStack() {
+        LuaStack top = this.stack;
+        this.stack = top.getPrev();
+        top.setPrev(null);
     }
 }

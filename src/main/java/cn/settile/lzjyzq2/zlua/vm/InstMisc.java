@@ -7,7 +7,7 @@ public class InstMisc {
     public static void move(int i, LuaVM vm) {
         int a = Instruction.getA(i) + 1;
         int b = Instruction.getB(i) + 1;
-        vm.copy(a, b);
+        vm.copy(b,a);
     }
 
     public static void jmp(int i, LuaVM vm) {

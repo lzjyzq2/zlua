@@ -33,8 +33,9 @@ public class Program {
 
     public static void runLuaMain(String path) throws IOException {
         byte[] data = Files.readAllBytes(Paths.get(path));
-        Prototype proto = BinaryChunk.unDump(data);
-        luaMain(proto);
+        LuaState luaState = new DefaultLuaState();
+        luaState.load(data, path, "b");
+        luaState.call(0, 0);
     }
 
     public static void toUnDumpChunk(String path) throws IOException {
@@ -167,25 +168,6 @@ public class Program {
             return "\"" + constant + "\"";
         } else {
             return constant.toString();
-        }
-    }
-
-
-    public static void luaMain(Prototype prototype) {
-        int nRegs = prototype.getMaxStackSize();
-        LuaVM vm = new DefaultLuaState(nRegs + 8, prototype);
-        vm.setTop(nRegs);
-        for (; ; ) {
-            int pc = vm.getPC();
-            int i = vm.fetch();
-            OpCode opCode = Instruction.getOpcode(i);
-            if (opCode != OpCode.RETURN) {
-                opCode.getOpAction().execute(i, vm);
-                System.out.printf("[%02d] %-8s ", pc + 1, opCode.name());
-                printStack(vm);
-            } else {
-                break;
-            }
         }
     }
 

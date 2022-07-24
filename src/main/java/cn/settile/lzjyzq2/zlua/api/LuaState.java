@@ -3,6 +3,15 @@ package cn.settile.lzjyzq2.zlua.api;
 import cn.settile.lzjyzq2.zlua.state.LuaTable;
 
 public interface LuaState {
+
+    int LUA_MINSTACK = 20;
+
+    int LUAI_MAXSTACK = 1000000;
+
+    int LUA_REGISTRYINDEX = -LUAI_MAXSTACK - 1000;
+
+    long LUA_RIDX_GLOBALS = 2;
+
     /* basic stack manipulation */
     int getTop();
 
@@ -101,4 +110,22 @@ public interface LuaState {
     int load(byte[] chunk, String chunkName, String mode);
 
     void call(int nArgs, int nResults);
+
+    void pushJavaFunction(JavaFunction javaFunc);
+
+    boolean isJavaFunction(int idx);
+
+    JavaFunction toJavaFunction(int idx);
+
+    LuaTable getRegistry();
+
+    void setRegistry(LuaTable registry);
+
+    void pushGlobalTable();
+
+    LuaType getGlobal(String name);
+
+    void setGlobal(String name);
+
+    void register(String name,JavaFunction javaFunc);
 }

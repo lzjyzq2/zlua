@@ -11,12 +11,60 @@ public class DefaultLuaState implements LuaState, LuaVM {
 
     private LuaStack stack;
 
+    private LuaTable registry;
+
     public DefaultLuaState() {
-        this(20);
+        this(LUA_MINSTACK);
     }
 
     public DefaultLuaState(int size) {
         this.stack = new LuaStack(size);
+        this.registry = new LuaTable(0, 0);
+        this.registry.put(LUA_RIDX_GLOBALS, new LuaTable(0, 0));
+
+        pushLuaStack(new LuaStack(LUA_MINSTACK, this));
+    }
+
+    public LuaStack getStack() {
+        return stack;
+    }
+
+    public void setStack(LuaStack stack) {
+        this.stack = stack;
+    }
+
+    public LuaTable getRegistry() {
+        return registry;
+    }
+
+    @Override
+    public void setRegistry(LuaTable registry) {
+        this.registry = registry;
+    }
+
+    @Override
+    public void pushGlobalTable() {
+        Object global = this.registry.get(LUA_RIDX_GLOBALS);
+        stack.push(global);
+    }
+
+    @Override
+    public LuaType getGlobal(String name) {
+        Object t = this.registry.get(LUA_RIDX_GLOBALS);
+        return getTable(t, name);
+    }
+
+    @Override
+    public void setGlobal(String name) {
+        Object t = this.registry.get(LUA_RIDX_GLOBALS);
+        Object val = stack.pop();
+        setTable(t, name, val);
+    }
+
+    @Override
+    public void register(String name, JavaFunction javaFunc) {
+        pushJavaFunction(javaFunc);
+        setGlobal(name);
     }
 
     @Override
@@ -388,11 +436,60 @@ public class DefaultLuaState implements LuaState, LuaVM {
         Object value = stack.get(-(nArgs + 1));
         if (value instanceof Closure) {
             Closure c = (Closure) value;
-            System.out.printf("call %s<%d,%d>\n", c.getProto().getSource(), c.getProto().getLineDefined(), c.getProto().getLastLineDefined());
-            callLuaClosure(nArgs, nResults, c);
+            if (c.isPrototype()) {
+                callLuaClosure(nArgs, nResults, c);
+            } else if (c.isJavaFunction()) {
+                callJavaClosure(nArgs, nResults, c);
+            } else {
+                throw new LuaUnknownFunctionTypeException();
+            }
+
         } else {
             throw new LuaNotFunctionException();
         }
+    }
+
+    private void callJavaClosure(int nArgs, int nResults, Closure c) {
+        LuaStack newStack = new LuaStack(nArgs + 20);
+        newStack.setClosure(c);
+        Object[] args = this.stack.popN(nArgs);
+        newStack.pushN(args, nArgs);
+        this.stack.pop();
+
+        pushLuaStack(newStack);
+        int r = c.getJavaFunction().invoke(this);
+        popLuaStack();
+
+        if (nResults != 0) {
+            Object[] results = newStack.popN(r);
+            stack.check(results.length);
+            stack.pushN(results, nResults);
+        }
+    }
+
+    @Override
+    public void pushJavaFunction(JavaFunction javaFunc) {
+        stack.push(new Closure(javaFunc));
+    }
+
+    @Override
+    public boolean isJavaFunction(int idx) {
+        Object val = stack.get(idx);
+        if (val instanceof Closure) {
+            Closure closure = (Closure) val;
+            return closure.isJavaFunction();
+        }
+        return false;
+    }
+
+    @Override
+    public JavaFunction toJavaFunction(int idx) {
+        Object val = stack.get(idx);
+        if (val instanceof Closure) {
+            Closure closure = (Closure) val;
+            return closure.getJavaFunction();
+        }
+        return null;
     }
 
     private void callLuaClosure(int nArgs, int nResults, Closure c) {
@@ -500,4 +597,6 @@ public class DefaultLuaState implements LuaState, LuaVM {
         this.stack = top.getPrev();
         top.setPrev(null);
     }
+
+
 }

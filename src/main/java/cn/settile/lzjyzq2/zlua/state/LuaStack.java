@@ -1,5 +1,6 @@
 package cn.settile.lzjyzq2.zlua.state;
 
+import cn.settile.lzjyzq2.zlua.api.LuaState;
 import cn.settile.lzjyzq2.zlua.exception.LuaStackIndexOutException;
 import cn.settile.lzjyzq2.zlua.exception.LuaStackOverflowException;
 import cn.settile.lzjyzq2.zlua.exception.LuaStackUnderflowException;
@@ -18,9 +19,16 @@ public class LuaStack {
 
     private int pc = 0;
 
+    private LuaState luaState;
+
 
     public LuaStack(int size) {
+        this(size, null);
+    }
+
+    public LuaStack(int size, LuaState luaState) {
         this.slots = new Object[size];
+        this.luaState = luaState;
     }
 
     public boolean check(int n) {
@@ -59,6 +67,9 @@ public class LuaStack {
     }
 
     public int absIndex(int idx) {
+        if (idx <= LuaState.LUA_REGISTRYINDEX) {
+            return idx;
+        }
         if (idx >= 0) {
             return idx;
         }
@@ -66,11 +77,19 @@ public class LuaStack {
     }
 
     public boolean isValid(int idx) {
+        if (idx == LuaState.LUA_REGISTRYINDEX) {
+            return true;
+        }
         int absIndex = absIndex(idx);
         return absIndex > 0 && absIndex <= top;
     }
 
     public void set(int idx, Object value) {
+        if (idx == LuaState.LUA_REGISTRYINDEX) {
+            if (value instanceof LuaTable) {
+                this.luaState.setRegistry((LuaTable) value);
+            }
+        }
         int absIndex = absIndex(idx);
         if (absIndex > 0 && absIndex <= top) {
             slots[absIndex - 1] = value;
@@ -80,6 +99,9 @@ public class LuaStack {
     }
 
     public Object get(int idx) {
+        if (idx == LuaState.LUA_REGISTRYINDEX) {
+            return this.luaState.getRegistry();
+        }
         int absIndex = absIndex(idx);
         if (absIndex > 0 && absIndex <= top) {
             return slots[absIndex - 1];

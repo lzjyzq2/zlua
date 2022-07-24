@@ -13,7 +13,7 @@ public enum OpCode {
     LOADBOOL(0, 1, OpArgU, OpArgU, IABC, InstLoad::loadBool), // R(A) := (bool)B; if (C) pc++
     LOADNIL(0, 1, OpArgU, OpArgN, IABC, InstLoad::loadNil), // R(A), R(A+1), ..., R(A+B) := nIl
     GETUPVAL(0, 1, OpArgU, OpArgN, IABC, null), // R(A) := UpValue[B]
-    GETTABUP(0, 1, OpArgU, OpArgK, IABC, null), // R(A) := UpValue[B][RK(C)]
+    GETTABUP(0, 1, OpArgU, OpArgK, IABC, InstUpvalue::getTabUp), // R(A) := UpValue[B][RK(C)]
     GETTABLE(0, 1, OpArgR, OpArgK, IABC, InstTable::getTable), // R(A) := R(B)[RK(C)]
     SETTABUP(0, 0, OpArgK, OpArgK, IABC, null), // UpValue[A][RK(B)] := RK(C)
     SETUPVAL(0, 0, OpArgU, OpArgN, IABC, null), // UpValue[B] := R(A)

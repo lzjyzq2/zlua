@@ -7,6 +7,7 @@ import cn.settile.lzjyzq2.zlua.chunk.BinaryChunk;
 import cn.settile.lzjyzq2.zlua.chunk.LocVar;
 import cn.settile.lzjyzq2.zlua.chunk.Prototype;
 import cn.settile.lzjyzq2.zlua.chunk.Upvalue;
+import cn.settile.lzjyzq2.zlua.lib.IO;
 import cn.settile.lzjyzq2.zlua.state.DefaultLuaState;
 import cn.settile.lzjyzq2.zlua.vm.Instruction;
 import cn.settile.lzjyzq2.zlua.vm.OpArg;
@@ -34,6 +35,7 @@ public class Program {
     public static void runLuaMain(String path) throws IOException {
         byte[] data = Files.readAllBytes(Paths.get(path));
         LuaState luaState = new DefaultLuaState();
+        luaState.register("print", IO::print);
         luaState.load(data, path, "b");
         luaState.call(0, 0);
     }

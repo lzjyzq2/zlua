@@ -1,5 +1,6 @@
 package cn.settile.lzjyzq2.zlua.chunk;
 
+import cn.settile.lzjyzq2.zlua.api.Function;
 import cn.settile.lzjyzq2.zlua.util.BinaryChunkUtil;
 import lombok.*;
 
@@ -10,7 +11,7 @@ import java.nio.ByteBuffer;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Prototype {
+public class Prototype implements Function {
 
 
     private static final int TAG_NIL = 0x00;

@@ -9,14 +9,14 @@ import java.nio.ByteBuffer;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Upvalue {
+public class UpvalueInfo {
 
     private byte instack;
 
     private byte idx;
 
-    public static Upvalue read(ByteBuffer buffer) {
-        return Upvalue.builder()
+    public static UpvalueInfo read(ByteBuffer buffer) {
+        return UpvalueInfo.builder()
                 .instack(buffer.get())
                 .idx(buffer.get())
                 .build();

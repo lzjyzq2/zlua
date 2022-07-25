@@ -5,6 +5,8 @@ import cn.settile.lzjyzq2.zlua.exception.LuaStackIndexOutException;
 import cn.settile.lzjyzq2.zlua.exception.LuaStackOverflowException;
 import cn.settile.lzjyzq2.zlua.exception.LuaStackUnderflowException;
 
+import java.util.Map;
+
 public class LuaStack {
 
     private Object[] slots;
@@ -19,7 +21,9 @@ public class LuaStack {
 
     private int pc = 0;
 
-    private LuaState luaState;
+    private final LuaState luaState;
+
+    private Map<Integer, Upvalue> openuvs;
 
 
     public LuaStack(int size) {
@@ -77,6 +81,11 @@ public class LuaStack {
     }
 
     public boolean isValid(int idx) {
+        if (idx < LuaState.LUA_REGISTRYINDEX) {
+            int uvIdx = LuaState.LUA_REGISTRYINDEX - idx - 1;
+            Closure c = this.closure;
+            return c != null && uvIdx < c.getUpvalues().length;
+        }
         if (idx == LuaState.LUA_REGISTRYINDEX) {
             return true;
         }
@@ -85,6 +94,14 @@ public class LuaStack {
     }
 
     public void set(int idx, Object value) {
+        if (idx < LuaState.LUA_REGISTRYINDEX) {
+            int uvIdx = LuaState.LUA_REGISTRYINDEX - idx - 1;
+            Closure c = this.closure;
+            if (c != null && uvIdx < c.getUpvalues().length) {
+                c.getUpvalues()[uvIdx].setVal(value);
+            }
+            return;
+        }
         if (idx == LuaState.LUA_REGISTRYINDEX) {
             if (value instanceof LuaTable) {
                 this.luaState.setRegistry((LuaTable) value);
@@ -99,6 +116,14 @@ public class LuaStack {
     }
 
     public Object get(int idx) {
+        if (idx < LuaState.LUA_REGISTRYINDEX) {
+            int uvIdx = LuaState.LUA_REGISTRYINDEX - idx - 1;
+            Closure c = this.closure;
+            if (c == null || uvIdx >= c.getUpvalues().length) {
+                return null;
+            }
+            return c.getUpvalues()[uvIdx].getVal();
+        }
         if (idx == LuaState.LUA_REGISTRYINDEX) {
             return this.luaState.getRegistry();
         }
@@ -188,5 +213,13 @@ public class LuaStack {
 
     public void setVarargs(Object[] varargs) {
         this.varargs = varargs;
+    }
+
+    public Map<Integer, Upvalue> getOpenuvs() {
+        return openuvs;
+    }
+
+    public void setOpenuvs(Map<Integer, Upvalue> openuvs) {
+        this.openuvs = openuvs;
     }
 }

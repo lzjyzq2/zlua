@@ -12,11 +12,11 @@ public enum OpCode {
     LOADKX(0, 1, OpArgN, OpArgN, IABx, InstLoad::loadKx), // R(A) := Kst(extra arg)
     LOADBOOL(0, 1, OpArgU, OpArgU, IABC, InstLoad::loadBool), // R(A) := (bool)B; if (C) pc++
     LOADNIL(0, 1, OpArgU, OpArgN, IABC, InstLoad::loadNil), // R(A), R(A+1), ..., R(A+B) := nIl
-    GETUPVAL(0, 1, OpArgU, OpArgN, IABC, null), // R(A) := UpValue[B]
+    GETUPVAL(0, 1, OpArgU, OpArgN, IABC, InstUpvalue::getUpval), // R(A) := UpValue[B]
     GETTABUP(0, 1, OpArgU, OpArgK, IABC, InstUpvalue::getTabUp), // R(A) := UpValue[B][RK(C)]
     GETTABLE(0, 1, OpArgR, OpArgK, IABC, InstTable::getTable), // R(A) := R(B)[RK(C)]
-    SETTABUP(0, 0, OpArgK, OpArgK, IABC, null), // UpValue[A][RK(B)] := RK(C)
-    SETUPVAL(0, 0, OpArgU, OpArgN, IABC, null), // UpValue[B] := R(A)
+    SETTABUP(0, 0, OpArgK, OpArgK, IABC, InstUpvalue::setTabUp), // UpValue[A][RK(B)] := RK(C)
+    SETUPVAL(0, 0, OpArgU, OpArgN, IABC, InstUpvalue::setUpval), // UpValue[B] := R(A)
     SETTABLE(0, 0, OpArgK, OpArgK, IABC, InstTable::setTable), // R(A)[RK(B)] := RK(C)
     NEWTABLE(0, 1, OpArgU, OpArgU, IABC, InstTable::newTable), // R(A) := {} (size = B,C)
     SELF(0, 1, OpArgR, OpArgK, IABC, InstCall::self), // R(A+1) := R(B); R(A) := R(B)[RK(C)]

@@ -3,9 +3,14 @@ package cn.settile.lzjyzq2.zlua.state;
 import cn.settile.lzjyzq2.zlua.api.*;
 import cn.settile.lzjyzq2.zlua.chunk.BinaryChunk;
 import cn.settile.lzjyzq2.zlua.chunk.Prototype;
+import cn.settile.lzjyzq2.zlua.chunk.UpvalueInfo;
 import cn.settile.lzjyzq2.zlua.exception.*;
 import cn.settile.lzjyzq2.zlua.vm.Instruction;
 import cn.settile.lzjyzq2.zlua.vm.OpCode;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class DefaultLuaState implements LuaState, LuaVM {
 
@@ -65,6 +70,16 @@ public class DefaultLuaState implements LuaState, LuaVM {
     public void register(String name, JavaFunction javaFunc) {
         pushJavaFunction(javaFunc);
         setGlobal(name);
+    }
+
+    @Override
+    public void pushJavaClosure(JavaFunction javaFunc, int n) {
+        Closure closure = new Closure(javaFunc, n);
+        for (int i = n; i > 0; i--) {
+            Object val = stack.pop();
+            closure.getUpvalues()[n - 1] = new Upvalue(val);
+        }
+        stack.push(closure);
     }
 
     @Override
@@ -426,8 +441,12 @@ public class DefaultLuaState implements LuaState, LuaVM {
     @Override
     public int load(byte[] chunk, String chunkName, String mode) {
         Prototype proto = BinaryChunk.unDump(chunk);
-        Closure closure = new Closure(proto);
+        Closure closure = new Closure(proto, 0);
         stack.push(closure);
+        if (proto.getUpValues().length > 0) {
+            Object env = registry.get(LUA_RIDX_GLOBALS);
+            closure.getUpvalues()[0] = new Upvalue(env);
+        }
         return 0;
     }
 
@@ -469,7 +488,7 @@ public class DefaultLuaState implements LuaState, LuaVM {
 
     @Override
     public void pushJavaFunction(JavaFunction javaFunc) {
-        stack.push(new Closure(javaFunc));
+        stack.push(new Closure(javaFunc, 0));
     }
 
     @Override
@@ -569,8 +588,31 @@ public class DefaultLuaState implements LuaState, LuaVM {
     @Override
     public void loadProto(int idx) {
         Prototype proto = stack.getClosure().getProto().getProtos()[idx];
-        Closure closure = new Closure(proto);
+        Closure closure = new Closure(proto, 0);
         stack.push(closure);
+
+        int nUpValues = proto.getUpValues().length;
+        for (int i = 0; i < nUpValues; i++) {
+
+            UpvalueInfo upvalueInfo = proto.getUpValues()[i];
+            int uvIdx = upvalueInfo.getIdx();
+
+            if (upvalueInfo.getInstack() == 1) {
+                if (stack.getOpenuvs() == null) {
+                    stack.setOpenuvs(new HashMap<>());
+                }
+                Map<Integer, Upvalue> openUVs = stack.getOpenuvs();
+                Upvalue openUV = openUVs.get(uvIdx);
+                if (openUV != null) {
+                    closure.getUpvalues()[i] = openUV;
+                } else {
+                    closure.getUpvalues()[i] = new Upvalue(stack.get(uvIdx+1));
+                    openUVs.put(uvIdx, closure.getUpvalues()[i]);
+                }
+            } else {
+                closure.getUpvalues()[i] = stack.getClosure().getUpvalues()[uvIdx];
+            }
+        }
     }
 
     @Override
@@ -585,6 +627,20 @@ public class DefaultLuaState implements LuaState, LuaVM {
     @Override
     public int registerCount() {
         return stack.getClosure().getProto().getMaxStackSize();
+    }
+
+    @Override
+    public void closeUpvalues(int a) {
+        // todo check this 存在问题
+        if (stack.getOpenuvs() != null) {
+            for (Iterator<Map.Entry<Integer, Upvalue>> it = stack.getOpenuvs().entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry<Integer, Upvalue> upvalueEntry = it.next();
+                if (upvalueEntry.getKey() > a - 1) {
+                    upvalueEntry.getValue().setVal(stack.get(upvalueEntry.getKey()));
+                    it.remove();
+                }
+            }
+        }
     }
 
     public void pushLuaStack(LuaStack stack) {

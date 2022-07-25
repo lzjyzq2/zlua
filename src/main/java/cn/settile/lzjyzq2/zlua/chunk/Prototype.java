@@ -38,7 +38,7 @@ public class Prototype implements Function {
 
     private Object[] constants;
 
-    private Upvalue[] upValues;
+    private UpvalueInfo[] upValues;
 
     private Prototype[] protos;
 
@@ -105,12 +105,12 @@ public class Prototype implements Function {
         }
     }
 
-    private static Upvalue[] readUpvalues(ByteBuffer buffer) {
-        Upvalue[] upvalues = new Upvalue[buffer.getInt()];
-        for (int i = 0; i < upvalues.length; i++) {
-            upvalues[i] = Upvalue.read(buffer);
+    private static UpvalueInfo[] readUpvalues(ByteBuffer buffer) {
+        UpvalueInfo[] upvalueInfos = new UpvalueInfo[buffer.getInt()];
+        for (int i = 0; i < upvalueInfos.length; i++) {
+            upvalueInfos[i] = UpvalueInfo.read(buffer);
         }
-        return upvalues;
+        return upvalueInfos;
     }
 
     private static Prototype[] readProtos(ByteBuffer buffer, String parentSource) {

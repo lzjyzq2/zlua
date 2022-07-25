@@ -15,7 +15,7 @@ public class InstMisc {
         int sBx = Instruction.getSBx(i);
         vm.addPC(sBx);
         if (a != 0) {
-            throw new RuntimeException("todo");
+            vm.closeUpvalues(a);
         }
     }
 }

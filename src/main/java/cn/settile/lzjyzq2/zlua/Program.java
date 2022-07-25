@@ -2,11 +2,10 @@ package cn.settile.lzjyzq2.zlua;
 
 import cn.settile.lzjyzq2.zlua.api.LuaState;
 import cn.settile.lzjyzq2.zlua.api.LuaType;
-import cn.settile.lzjyzq2.zlua.api.LuaVM;
 import cn.settile.lzjyzq2.zlua.chunk.BinaryChunk;
 import cn.settile.lzjyzq2.zlua.chunk.LocVar;
 import cn.settile.lzjyzq2.zlua.chunk.Prototype;
-import cn.settile.lzjyzq2.zlua.chunk.Upvalue;
+import cn.settile.lzjyzq2.zlua.chunk.UpvalueInfo;
 import cn.settile.lzjyzq2.zlua.lib.IO;
 import cn.settile.lzjyzq2.zlua.state.DefaultLuaState;
 import cn.settile.lzjyzq2.zlua.vm.Instruction;
@@ -150,8 +149,8 @@ public class Program {
         }
         System.out.printf("upvalues (%d):\n", prototype.getUpValues().length);
         for (int i = 0; i < prototype.getUpValues().length; i++) {
-            Upvalue upvalue = prototype.getUpValues()[i];
-            System.out.printf("\t%d\t%s\t%d\t%d\n", i, upvalName(prototype, i), upvalue.getInstack(), upvalue.getIdx());
+            UpvalueInfo upvalueInfo = prototype.getUpValues()[i];
+            System.out.printf("\t%d\t%s\t%d\t%d\n", i, upvalName(prototype, i), upvalueInfo.getInstack(), upvalueInfo.getIdx());
         }
 
     }

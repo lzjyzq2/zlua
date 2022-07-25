@@ -127,5 +127,8 @@ public interface LuaState {
 
     void setGlobal(String name);
 
-    void register(String name,JavaFunction javaFunc);
+    void register(String name, JavaFunction javaFunc);
+
+    void pushJavaClosure(JavaFunction javaFunc, int n);
+
 }

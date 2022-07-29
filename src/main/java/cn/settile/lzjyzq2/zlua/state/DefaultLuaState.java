@@ -606,7 +606,8 @@ public class DefaultLuaState implements LuaState, LuaVM {
                 if (openUV != null) {
                     closure.getUpvalues()[i] = openUV;
                 } else {
-                    closure.getUpvalues()[i] = new Upvalue(stack.get(uvIdx+1));
+                    int _idx = uvIdx + 1;
+                    closure.getUpvalues()[i] = new Upvalue(stack.get(_idx), stack, _idx);
                     openUVs.put(uvIdx, closure.getUpvalues()[i]);
                 }
             } else {

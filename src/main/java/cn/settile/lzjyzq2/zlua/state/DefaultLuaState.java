@@ -632,12 +632,11 @@ public class DefaultLuaState implements LuaState, LuaVM {
 
     @Override
     public void closeUpvalues(int a) {
-        // todo check this 存在问题
         if (stack.getOpenuvs() != null) {
             for (Iterator<Map.Entry<Integer, Upvalue>> it = stack.getOpenuvs().entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry<Integer, Upvalue> upvalueEntry = it.next();
-                if (upvalueEntry.getKey() > a - 1) {
-                    upvalueEntry.getValue().setVal(stack.get(upvalueEntry.getKey()));
+                if (upvalueEntry.getKey() >= a - 1) {
+                    upvalueEntry.getValue().close(stack.get(upvalueEntry.getKey()+1));
                     it.remove();
                 }
             }

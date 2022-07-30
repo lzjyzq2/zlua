@@ -25,4 +25,9 @@ public class Upvalue {
             luaStack.set(idx, val);
         }
     }
+
+    public void close(Object val){
+        this.val = val;
+        this.luaStack = null;
+    }
 }

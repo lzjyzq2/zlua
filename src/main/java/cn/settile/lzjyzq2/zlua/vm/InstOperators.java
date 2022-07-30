@@ -115,7 +115,6 @@ public class InstOperators {
         int c = Instruction.getC(i);
         vm.getRK(b);
         vm.getRK(c);
-        // todo check if condition
         if (vm.compare(-2, -1, op) == (a == 0)) {
             vm.addPC(1);
         }
@@ -160,7 +159,6 @@ public class InstOperators {
         int a = Instruction.getA(i);
         int c = Instruction.getC(i);
         a += 1;
-        // todo check if condition
         if (vm.toBoolean(a) == (c == 0)) {
             vm.addPC(1);
         }

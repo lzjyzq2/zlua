@@ -10,20 +10,20 @@ import cn.settile.lzjyzq2.zlua.number.Number;
 public class ApiArith {
 
     private static final Operator[] operators = new Operator[]{
-            new Operator(LongBinaryOperator.ADD, DoubleBinaryOperator.ADD),
-            new Operator(LongBinaryOperator.SUB, DoubleBinaryOperator.SUB),
-            new Operator(LongBinaryOperator.MUL, DoubleBinaryOperator.MUL),
-            new Operator(LongBinaryOperator.MOD, DoubleBinaryOperator.MOD),
-            new Operator(null, DoubleBinaryOperator.POW),
-            new Operator(null, DoubleBinaryOperator.DIV),
-            new Operator(LongBinaryOperator.IDIV, DoubleBinaryOperator.IDIV),
-            new Operator(LongBinaryOperator.AND, null),
-            new Operator(LongBinaryOperator.OR, null),
-            new Operator(LongBinaryOperator.XOR, null),
-            new Operator(LongBinaryOperator.SHL, null),
-            new Operator(LongBinaryOperator.SHR, null),
-            new Operator(LongBinaryOperator.UNM, DoubleBinaryOperator.UNM),
-            new Operator(LongBinaryOperator.NOT, null),
+            new Operator("__add",LongBinaryOperator.ADD, DoubleBinaryOperator.ADD),
+            new Operator("__sub",LongBinaryOperator.SUB, DoubleBinaryOperator.SUB),
+            new Operator("__mul",LongBinaryOperator.MUL, DoubleBinaryOperator.MUL),
+            new Operator("__mod",LongBinaryOperator.MOD, DoubleBinaryOperator.MOD),
+            new Operator("__pow",null, DoubleBinaryOperator.POW),
+            new Operator("__div",null, DoubleBinaryOperator.DIV),
+            new Operator("__idiv",LongBinaryOperator.IDIV, DoubleBinaryOperator.IDIV),
+            new Operator("__band",LongBinaryOperator.AND, null),
+            new Operator("__bor",LongBinaryOperator.OR, null),
+            new Operator("__bxor",LongBinaryOperator.XOR, null),
+            new Operator("__shl",LongBinaryOperator.SHL, null),
+            new Operator("__shr",LongBinaryOperator.SHR, null),
+            new Operator("__unm",LongBinaryOperator.UNM, DoubleBinaryOperator.UNM),
+            new Operator("__bnot",LongBinaryOperator.NOT, null),
     };
 
     public static Operator getOperator(ArithOp arithOp) {

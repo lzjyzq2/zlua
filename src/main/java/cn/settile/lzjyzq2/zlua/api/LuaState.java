@@ -1,6 +1,7 @@
 package cn.settile.lzjyzq2.zlua.api;
 
 import cn.settile.lzjyzq2.zlua.state.LuaTable;
+import cn.settile.lzjyzq2.zlua.util.Pair;
 
 public interface LuaState {
 
@@ -131,4 +132,23 @@ public interface LuaState {
 
     void pushJavaClosure(JavaFunction javaFunc, int n);
 
+    Pair<Object, Boolean> callMetaMethod(Object a, Object b, String metaMethod);
+
+    Object getMetaField(Object val, String fieldName);
+
+    boolean getMetaTable(int idx);
+
+    void setMetaTable(int idx);
+
+    int rawLen(int idx);
+
+    boolean rawEqual(int idx1,int idx2);
+
+    LuaType rawGet(int idx);
+
+    void rawSet(int idx);
+
+    LuaType rawGetI(int idx,long i);
+
+    void rawSetI(int idx,long i);
 }

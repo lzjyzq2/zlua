@@ -57,4 +57,12 @@ class ProgramTest {
                 Paths.get(Objects.requireNonNull(getClass().getResource("/upvalue.out")).toURI()).toFile().getAbsolutePath()
         });
     }
+
+    @Test
+    void main_r_v() throws URISyntaxException, IOException {
+        Program.main(new String[]{
+                "-r",
+                Paths.get(Objects.requireNonNull(getClass().getResource("/vector2.out")).toURI()).toFile().getAbsolutePath()
+        });
+    }
 }

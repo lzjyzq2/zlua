@@ -149,14 +149,12 @@ public class LuaStack {
     public void reverse(int from, int to) {
         from = absIndex(from);
         to = absIndex(to);
-        int max = Math.max(from, to);
-        int min = Math.min(from, to);
-        while (min < max) {
-            Object tmpValue = slots[max];
-            slots[max] = slots[min];
-            slots[min] = tmpValue;
-            min++;
-            max--;
+        while (from < to) {
+            Object tmpValue = slots[from];
+            slots[from] = slots[to];
+            slots[to] = tmpValue;
+            from++;
+            to--;
         }
     }
 

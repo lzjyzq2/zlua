@@ -7,6 +7,7 @@ import cn.settile.lzjyzq2.zlua.chunk.LocVar;
 import cn.settile.lzjyzq2.zlua.chunk.Prototype;
 import cn.settile.lzjyzq2.zlua.chunk.UpvalueInfo;
 import cn.settile.lzjyzq2.zlua.lib.IO;
+import cn.settile.lzjyzq2.zlua.lib.Meta;
 import cn.settile.lzjyzq2.zlua.state.DefaultLuaState;
 import cn.settile.lzjyzq2.zlua.vm.Instruction;
 import cn.settile.lzjyzq2.zlua.vm.OpArg;
@@ -35,6 +36,8 @@ public class Program {
         byte[] data = Files.readAllBytes(Paths.get(path));
         LuaState luaState = new DefaultLuaState();
         luaState.register("print", IO::print);
+        luaState.register("getmetatable", Meta::getMetatable);
+        luaState.register("setmetatable", Meta::setMetatable);
         luaState.load(data, path, "b");
         luaState.call(0, 0);
     }
@@ -196,4 +199,6 @@ public class Program {
         }
         System.out.println();
     }
+
+
 }

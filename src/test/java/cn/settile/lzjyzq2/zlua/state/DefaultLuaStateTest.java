@@ -57,7 +57,7 @@ public class DefaultLuaStateTest {
     }
 
     @Test
-    void test1(){
+    void test1() {
         LuaState luaState = new DefaultLuaState(20);
         luaState.pushInteger(1);
         luaState.pushString("2.0");
@@ -73,7 +73,17 @@ public class DefaultLuaStateTest {
         printStack(luaState);
         luaState.concat(3);
         printStack(luaState);
-        luaState.pushBoolean(luaState.compare(1,2, CompareOp.LUA_OPEQ));
+        luaState.pushBoolean(luaState.compare(1, 2, CompareOp.LUA_OPEQ));
+        printStack(luaState);
+    }
+
+    @Test
+    void rotate() {
+        LuaState luaState = new DefaultLuaState(20);
+        for (int i = 0; i < 7; i++) {
+            luaState.pushInteger(i);
+        }
+        luaState.rotate(7, 0);
         printStack(luaState);
     }
 }

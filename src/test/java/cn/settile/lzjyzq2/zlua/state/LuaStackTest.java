@@ -1,5 +1,6 @@
 package cn.settile.lzjyzq2.zlua.state;
 
+import cn.settile.lzjyzq2.zlua.api.LuaState;
 import cn.settile.lzjyzq2.zlua.exception.LuaStackIndexOutException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

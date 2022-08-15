@@ -1,5 +1,6 @@
 package cn.settile.lzjyzq2.zlua.state;
 
+import cn.settile.lzjyzq2.zlua.api.LuaState;
 import cn.settile.lzjyzq2.zlua.exception.LuaTableNaNKeyException;
 import cn.settile.lzjyzq2.zlua.exception.LuaTableNullKeyException;
 
@@ -11,6 +12,8 @@ public class LuaTable {
     private Object[] arr;
 
     private HashMap<Object, Object> map;
+
+    private LuaTable metatable;
 
     public LuaTable(int nArr, int nRec) {
         if (nArr > 0) {
@@ -111,5 +114,17 @@ public class LuaTable {
 
     public int len() {
         return arr == null ? 0 : arr.length;
+    }
+
+    public void setMetatable(LuaTable metatable) {
+        this.metatable = metatable;
+    }
+
+    public LuaTable getMetatable() {
+        return metatable;
+    }
+
+    public boolean hasMetaField(String fieldName) {
+        return metatable != null && metatable.get(fieldName) != null;
     }
 }

@@ -8,6 +8,7 @@ import cn.settile.lzjyzq2.zlua.chunk.Prototype;
 import cn.settile.lzjyzq2.zlua.chunk.UpvalueInfo;
 import cn.settile.lzjyzq2.zlua.lib.IO;
 import cn.settile.lzjyzq2.zlua.lib.Meta;
+import cn.settile.lzjyzq2.zlua.lib.Std;
 import cn.settile.lzjyzq2.zlua.state.DefaultLuaState;
 import cn.settile.lzjyzq2.zlua.vm.Instruction;
 import cn.settile.lzjyzq2.zlua.vm.OpArg;
@@ -38,6 +39,9 @@ public class Program {
         luaState.register("print", IO::print);
         luaState.register("getmetatable", Meta::getMetatable);
         luaState.register("setmetatable", Meta::setMetatable);
+        luaState.register("next", Std::next);
+        luaState.register("pairs", Std::pairs);
+        luaState.register("ipairs", Std::iPairs);
         luaState.load(data, path, "b");
         luaState.call(0, 0);
     }

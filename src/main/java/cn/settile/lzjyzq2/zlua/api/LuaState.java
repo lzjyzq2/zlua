@@ -100,7 +100,7 @@ public interface LuaState {
 
     LuaType getField(int idx, String k);
 
-    LuaType getI(int idx, int i);
+    LuaType getI(int idx, long i);
 
     void setTable(int idx);
 
@@ -151,4 +151,6 @@ public interface LuaState {
     LuaType rawGetI(int idx,long i);
 
     void rawSetI(int idx,long i);
+
+    boolean next(int idx);
 }

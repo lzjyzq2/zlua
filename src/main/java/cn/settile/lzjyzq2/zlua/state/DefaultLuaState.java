@@ -435,6 +435,23 @@ public class DefaultLuaState implements LuaState, LuaVM {
     }
 
     @Override
+    public boolean next(int idx) {
+        Object value = this.stack.get(idx);
+        if (value instanceof LuaTable) {
+            LuaTable t = (LuaTable) value;
+            Object key = this.stack.pop();
+            Object nextKey = t.nextKey(key);
+            if (nextKey != null) {
+                this.stack.push(nextKey);
+                this.stack.push(t.get(nextKey));
+                return true;
+            }
+            return false;
+        }
+        throw new RuntimeException("table expected!");
+    }
+
+    @Override
     public boolean compare(int idx1, int idx2, CompareOp op) {
         Object value1 = stack.get(idx1);
         Object value2 = stack.get(idx2);
@@ -542,7 +559,7 @@ public class DefaultLuaState implements LuaState, LuaVM {
     }
 
     @Override
-    public LuaType getI(int idx, int i) {
+    public LuaType getI(int idx, long i) {
         Object t = stack.get(idx);
         return getTable(t, i, false);
     }

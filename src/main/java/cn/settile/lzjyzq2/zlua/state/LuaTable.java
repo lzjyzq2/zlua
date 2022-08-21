@@ -6,6 +6,7 @@ import cn.settile.lzjyzq2.zlua.exception.LuaTableNullKeyException;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 public class LuaTable {
 
@@ -14,6 +15,12 @@ public class LuaTable {
     private HashMap<Object, Object> map;
 
     private LuaTable metatable;
+
+    /**
+     * 存储键名
+     */
+    private Map<Object, Object> keys;
+    private boolean changed;
 
     public LuaTable(int nArr, int nRec) {
         if (nArr > 0) {
@@ -126,5 +133,40 @@ public class LuaTable {
 
     public boolean hasMetaField(String fieldName) {
         return metatable != null && metatable.get(fieldName) != null;
+    }
+
+    public Object nextKey(Object key) {
+        if (this.keys == null || key == null) {
+            initKeys();
+            this.changed = false;
+        }
+        return keys.get(key);
+    }
+
+    private void initKeys() {
+        if (keys == null) {
+            keys = new HashMap<>();
+        } else {
+            keys.clear();
+        }
+        Object key = null;
+        if (arr != null) {
+            for (int i = 0; i < arr.length; i++) {
+                if (arr[i] != null) {
+                    long nextKey = i + 1;
+                    keys.put(key, nextKey);
+                    key = nextKey;
+                }
+            }
+        }
+        if (map != null) {
+            for (Object k : map.keySet()) {
+                Object v = map.get(k);
+                if (v != null) {
+                    keys.put(key, k);
+                    key = k;
+                }
+            }
+        }
     }
 }

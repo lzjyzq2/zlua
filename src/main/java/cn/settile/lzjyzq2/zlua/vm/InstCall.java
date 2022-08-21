@@ -115,4 +115,24 @@ public class InstCall {
         vm.getTable(b);
         vm.replace(a);
     }
+
+    public static void tForCall(int i, LuaVM vm) {
+        int a = Instruction.getA(i);
+        int c = Instruction.getC(i);
+        a += 1;
+
+        pushFuncAndArgs(a, 3, vm);
+        vm.call(2, c);
+        popResults(a + 3, c + 1, vm);
+    }
+
+    public static void tForLoop(int i, LuaVM vm) {
+        int a = Instruction.getA(i);
+        int sBx = Instruction.getSBx(i);
+        a += 1;
+        if (!vm.isNil(a + 1)) {
+            vm.copy(a + 1, a);
+            vm.addPC(sBx);
+        }
+    }
 }

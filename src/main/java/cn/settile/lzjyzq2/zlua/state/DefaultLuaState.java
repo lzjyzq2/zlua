@@ -452,6 +452,32 @@ public class DefaultLuaState implements LuaState, LuaVM {
     }
 
     @Override
+    public int error() {
+        Object err = stack.pop();
+        throw new RuntimeException(err.toString());
+    }
+
+    @Override
+    public int pCall(int nArgs, int nResults, int msgh) {
+        LuaStack caller = this.stack;
+        Consts result;
+        try {
+            call(nArgs, nResults);
+            result = Consts.LUA_OK;
+        } catch (Exception e) {
+            if (msgh != 0) {
+                throw e;
+            }
+            while (stack != caller) {
+                popLuaStack();
+            }
+            stack.push(e.getMessage());
+            result = Consts.LUA_ERRRUN;
+        }
+        return result.ordinal();
+    }
+
+    @Override
     public boolean compare(int idx1, int idx2, CompareOp op) {
         Object value1 = stack.get(idx1);
         Object value2 = stack.get(idx2);

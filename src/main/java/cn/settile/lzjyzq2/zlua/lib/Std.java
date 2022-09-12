@@ -1,5 +1,6 @@
 package cn.settile.lzjyzq2.zlua.lib;
 
+import cn.settile.lzjyzq2.zlua.api.Consts;
 import cn.settile.lzjyzq2.zlua.api.LuaState;
 import cn.settile.lzjyzq2.zlua.api.LuaType;
 
@@ -37,5 +38,17 @@ public class Std {
         } else {
             return 2;
         }
+    }
+
+    public static int error(LuaState luaState) {
+        return luaState.error();
+    }
+
+    public static int pCall(LuaState luaState) {
+        int nArgs = luaState.getTop() - 1;
+        int status = luaState.pCall(nArgs, -1, 0);
+        luaState.pushBoolean(status == Consts.LUA_OK.ordinal());
+        luaState.insert(1);
+        return luaState.getTop();
     }
 }

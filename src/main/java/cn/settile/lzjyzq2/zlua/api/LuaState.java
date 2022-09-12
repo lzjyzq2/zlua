@@ -153,4 +153,9 @@ public interface LuaState {
     void rawSetI(int idx,long i);
 
     boolean next(int idx);
+
+    int error();
+
+    int pCall(int nArgs,int nResults, int msgh);
+
 }

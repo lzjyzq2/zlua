@@ -42,6 +42,8 @@ public class Program {
         luaState.register("next", Std::next);
         luaState.register("pairs", Std::pairs);
         luaState.register("ipairs", Std::iPairs);
+        luaState.register("error", Std::error);
+        luaState.register("pcall", Std::pCall);
         luaState.load(data, path, "b");
         luaState.call(0, 0);
     }
